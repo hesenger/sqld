@@ -15,7 +15,9 @@
   },
   "scripts": {
     "build": "tsup src/index.ts src/cli.ts --dts --format esm,cjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish": "npm publish --access public",
+    "test-cli": "npm run build && npm link && sqld ./test-project",
+    "test": "npx tsx src/**/*.spec.ts"
   },
   "keywords": [],
   "author": "github.com/hesenger",

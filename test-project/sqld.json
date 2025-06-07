@@ -1,0 +1,4 @@
+{
+  "schemas": ["schema.sql"],
+  "queries": ["queries.sql"]
+}
