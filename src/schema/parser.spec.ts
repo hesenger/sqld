@@ -1,6 +1,10 @@
 import { describe, it } from "node:test";
 import assert from "assert";
-import { parseAndValidateConfig, parseAndValidateSchema } from "./parser";
+import {
+  parseAndValidateConfig,
+  parseAndValidateQuery,
+  parseAndValidateSchema,
+} from "./parser";
 
 describe("config parser", () => {
   it("validates config object", () => {
@@ -81,5 +85,35 @@ describe("schema parser", () => {
     assert.equal(errors.length, 1);
     assert.equal(errors[0], "sqld schema invalid: tables count does not match");
     assert.equal(parsedSchema, null);
+  });
+});
+
+describe("query parser", () => {
+  it("parses query select *", () => {
+    const schema = `
+        CREATE TABLE users (
+            id INT PRIMARY KEY,
+            name VARCHAR(255)
+        );
+    `;
+
+    const query = `
+        -- name: listUsers :many
+        SELECT * FROM users;
+    `;
+
+    const { parsedSchema } = parseAndValidateSchema(schema);
+    const { parsedQueries, errors } = parseAndValidateQuery(
+      query,
+      parsedSchema!,
+    );
+
+    assert.equal(errors.length, 0, "errors is not empty: " + errors.join(", "));
+    assert.equal(parsedQueries.length, 1);
+
+    assert.equal(parsedQueries[0].name, "listUsers");
+    assert.equal(parsedQueries[0].type, "many");
+    assert.equal(parsedQueries[0].input.length, 0);
+    assert.equal(parsedQueries[0].output.length, 2);
   });
 });

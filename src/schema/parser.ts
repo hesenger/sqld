@@ -29,7 +29,7 @@ export function parseAndValidateConfig(schema: string): {
   return { parsedConfig: parsedSchema, errors: [] };
 }
 
-interface Schema {
+export interface Schema {
   tables: Table[];
 }
 
@@ -93,4 +93,30 @@ export function parseAndValidateSchema(schema: string): {
   }
 
   return { parsedSchema, errors };
+}
+
+interface Query {
+  name: string;
+  type: string;
+  input: Column[];
+  output: Column[];
+}
+
+export function parseAndValidateQuery(
+  query: string,
+  schema: Schema,
+): {
+  parsedQueries: Query[];
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  const parsedQuery: Query = {
+    name: "",
+    type: "",
+    input: [],
+    output: [],
+  };
+
+  return { parsedQueries: [parsedQuery], errors };
 }
