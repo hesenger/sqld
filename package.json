@@ -1,6 +1,6 @@
 {
   "name": "@hesenger/sqld",
-  "version": "1.6.0",
+  "version": "1.5.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.js",
@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts src/cli.ts --dts --format esm,cjs",
-    "publish": "npm run build && npm publish --access public",
+    "build-publish": "npm run build && npm publish --access public",
     "test-cli": "npm run build && npm link && sqld ./test-project",
     "test": "npx tsx src/**/*.spec.ts"
   },
