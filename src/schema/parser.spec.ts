@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "assert";
 import {
   parseAndValidateConfig,
-  parseAndValidateQuery,
+  parseAndValidateQueries,
   parseAndValidateSchema,
 } from "./parser";
 
@@ -95,15 +95,25 @@ describe("query parser", () => {
             id INT PRIMARY KEY,
             name VARCHAR(255)
         );
+
+        CREATE TABLE posts (
+            id INT PRIMARY KEY,
+            title VARCHAR(255),
+            content TEXT,
+            user_id INT
+        );
     `;
 
     const query = `
-        -- name: listUsers :many
-        SELECT * FROM users;
+        -- name: listPosts :many
+        SELECT u.name, p.title, p.content
+        FROM users u
+        JOIN posts p ON u.id = p.user_id
+        WHERE u.id = :id;
     `;
 
     const { parsedSchema } = parseAndValidateSchema(schema);
-    const { parsedQueries, errors } = parseAndValidateQuery(
+    const { parsedQueries, errors } = parseAndValidateQueries(
       query,
       parsedSchema!,
     );
@@ -111,9 +121,13 @@ describe("query parser", () => {
     assert.equal(errors.length, 0, "errors is not empty: " + errors.join(", "));
     assert.equal(parsedQueries.length, 1);
 
-    assert.equal(parsedQueries[0].name, "listUsers");
+    assert.equal(parsedQueries[0].name, "listPosts");
     assert.equal(parsedQueries[0].type, "many");
-    assert.equal(parsedQueries[0].input.length, 0);
-    assert.equal(parsedQueries[0].output.length, 2);
+    assert.equal(parsedQueries[0].input.length, 1);
+    assert.equal(parsedQueries[0].tableAliases["u"], "users");
+    assert.equal(parsedQueries[0].tableAliases["p"], "posts");
+    assert.equal(parsedQueries[0].input[0].name, "id");
+    assert.equal(parsedQueries[0].input[0].origin, "u.id");
+    assert.equal(parsedQueries[0].input[0].type, "INT");
   });
 });
