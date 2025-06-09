@@ -89,7 +89,7 @@ describe("schema parser", () => {
 });
 
 describe("query parser", () => {
-  it("parses query select *", () => {
+  it("parses query select with table aliases", () => {
     const schema = `
         CREATE TABLE users (
             id INT PRIMARY KEY,
@@ -129,5 +129,12 @@ describe("query parser", () => {
     assert.equal(parsedQueries[0].input[0].name, "id");
     assert.equal(parsedQueries[0].input[0].origin, "u.id");
     assert.equal(parsedQueries[0].input[0].type, "INT");
+    assert.equal(parsedQueries[0].output.length, 3);
+    assert.equal(parsedQueries[0].output[0].name, "name");
+    assert.equal(parsedQueries[0].output[0].type, "VARCHAR(255)");
+    assert.equal(parsedQueries[0].output[1].name, "title");
+    assert.equal(parsedQueries[0].output[1].type, "VARCHAR(255)");
+    assert.equal(parsedQueries[0].output[2].name, "content");
+    assert.equal(parsedQueries[0].output[2].type, "TEXT");
   });
 });

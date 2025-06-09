@@ -169,12 +169,49 @@ export function parseAndValidateQueries(
       });
     }
 
+    const selectRegex = /select\s+(.*)\s+from/gim;
+    const selectMatch = content.matchAll(selectRegex);
+    const selectColumns =
+      selectMatch
+        .next()
+        .value?.groups?.[1].split(",")
+        .map((column) => column.trim().toLowerCase()) ?? [];
+    console.log(selectColumns);
+    const output: Column[] = [];
+    for (const selectColumn of selectColumns) {
+      const origin = selectColumn;
+      const tableOrAlias = origin.split(".")[0].toLowerCase();
+      const isTableAlias = Object.keys(tableAliases).includes(tableOrAlias);
+      const table = isTableAlias
+        ? schema.tables.find(
+            (table) => table.name === tableAliases[tableOrAlias],
+          )
+        : schema.tables.find((table) => table.name === tableOrAlias);
+      if (!table) {
+        errors.push(
+          `sqld query invalid: table ${tableOrAlias} not found on schema`,
+        );
+        continue;
+      }
+
+      const columnName = origin.split(".")[1].toLowerCase();
+      const column = table.columns.find((column) => column.name === columnName);
+      if (!column) {
+        errors.push(
+          `sqld query invalid: column ${columnName} not found on table ${table.name}`,
+        );
+        continue;
+      }
+
+      output.push(column);
+    }
+
     const parsedQuery: Query = {
       name,
       type,
       tableAliases,
       input,
-      output: [],
+      output,
     };
 
     parsedQueries.push(parsedQuery);
